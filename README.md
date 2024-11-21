@@ -14,7 +14,7 @@
 
 NeurIPS 2024
 
-<sup>1</sup> [Show Lab](https://sites.google.com/view/showlab/home?authuser=0), National University of Singapore&nbsp; <sup>2</sup> Amazon&nbsp;
+<sup>1</sup> [Show Lab, National University of Singapore](https://sites.google.com/view/showlab/home?authuser=0) &nbsp; <sup>2</sup> Amazon&nbsp;
  
 [![arXiv](https://img.shields.io/badge/arXiv-<2409.19603>-<COLOR>.svg)](https://arxiv.org/abs/2409.19603)
 
@@ -23,6 +23,10 @@ NeurIPS 2024
 **News**
 * **[2024-11-20]** We released the training and inference code.
 * **[2024-09-29]** We released our paper on [arXiv](https://arxiv.org/abs/2409.19603).
+
+<p align="center"> <img src="assets/framework.jpg" width="666"></p>
+
+<p align="center"> <img src="assets/teaser.jpg" width="666"></p>
 
 ## TODO
 - [X] Release the inference code.
