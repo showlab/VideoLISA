@@ -43,7 +43,7 @@ def collate_fn(
     conversation_list = []
     masks_list = []
     label_list = []
-    valid_indices = []
+    dense_indices = []
     resize_list = []
     questions_list = []
     sampled_classes_list = []
@@ -57,7 +57,7 @@ def collate_fn(
         conversations,
         masks,
         label,
-        valid_idx,
+        dense_idx,
         resize,
         questions,
         sampled_classes,
@@ -69,7 +69,7 @@ def collate_fn(
         conversation_list.extend(conversations)
         label_list.append(label)
         masks_list.append(masks.float())
-        valid_indices.append(valid_idx)
+        dense_indices.append(dense_idx)
         resize_list.append(resize)
         questions_list.append(questions)
         sampled_classes_list.append(sampled_classes)
@@ -168,7 +168,7 @@ def collate_fn(
         "attention_masks": attention_masks,
         "masks_list": masks_list,
         "label_list": label_list,
-        "valid_indices": valid_indices,
+        "dense_indices": dense_indices,
         "resize_list": resize_list,
         "offset": torch.LongTensor(offset_list),
         "questions_list": questions_list,
