@@ -21,6 +21,7 @@ NeurIPS 2024
 </div>
 
 **News**
+* **[2024-11-26]** We released the [ReasonVOS](BENCHMARK.md) benchmark!
 * **[2024-11-26]** We released pre-trained VideoLISA-3.8B at [HuggingFace](https://huggingface.co/ZechenBai/VideoLISA-3.8B)!.
 * **[2024-11-20]** We released the training and inference code.
 * **[2024-09-29]** We released our paper on [arXiv](https://arxiv.org/abs/2409.19603).
@@ -50,6 +51,9 @@ First, please prepare the image data following this [instruction in LISA](https:
 We introduce the video datasets used in this project.
 Note that the data paths for video datasets are currently hard-coded in each dataset file in the `utils` folder.
 You may need to adjust it accordingly.
+
+### ReasonVOS
+Please refer to [BENCHMARK.md](BENCHMARK.md)
 
 ### MeViS
 Download the dataset from the [official release](https://github.com/henghuiding/MeViS).
