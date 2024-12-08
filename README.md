@@ -44,7 +44,23 @@ pip install -e .
 pip install flash-attn --no-build-isolation
 ```
 
-## Prepare Data
+## Inference Example
+```shell
+CUDA_VISIBLE_DEVICES=0 python chat.py \
+  --version="ZechenBai/VideoLISA-3.8B" \
+  --vision_tower="openai/clip-vit-large-patch14-336" \
+  --num_frames_dense=4 \
+  --num_frames_sparse=32 \
+  --save_overlay
+
+> Please input your prompt: In this video, there is something that shocks the cat and makes it jump. Can you find the object?
+> Please input the video path: examples/RBrZsgy4-SQ.mp4
+```
+
+<p align="center"> <img src="assets/example.png" width="666"></p>
+
+
+## Prepare Data for Training
 
 First, please prepare the image data following this [instruction in LISA](https://github.com/dvlab-research/LISA/tree/main?tab=readme-ov-file#training-data-preparation).
 
@@ -135,6 +151,10 @@ bash evaluation/mevis_val_u/run_inference_mevis.sh
 bash evaluation/mevis_val_u/run_eval_mevis.sh
 ```
 
+### ReasonVOS
+
+Please refer to [BENCHMARK.md](BENCHMARK.md).
+
 ### Other Datasets
 Ongoing.
 
@@ -142,7 +162,7 @@ Ongoing.
 ### Citation
 To cite the paper and model, please use the below:
 ```
-@article{bai2024videolisa,
+@article{bai2024one,
   title={One token to seg them all: Language instructed reasoning segmentation in videos},
   author={Bai, Zechen and He, Tong and Mei, Haiyang and Wang, Pichao and Gao, Ziteng and Chen, Joya and Liu, Lei and Zhang, Zheng and Shou, Mike Zheng},
   journal={arXiv preprint arXiv:2409.19603},

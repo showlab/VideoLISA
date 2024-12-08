@@ -58,3 +58,26 @@ class VideoCapture:
 
         cap.release()
         return frames, frame_idxs
+
+    @staticmethod
+    def load_all_frames_from_video(video_path):
+        cap = cv2.VideoCapture(video_path)
+        assert (cap.isOpened()), video_path
+
+        frames = []
+        frame_count = 0
+
+        while True:
+            # Read a frame
+            ret, frame = cap.read()
+            if not ret:
+                break  # Exit the loop if no more frames are available
+
+            frames.append(frame)
+            frame_count += 1
+
+        # Release the video capture object
+        cap.release()
+        print(f"Total frames read: {frame_count}")
+
+        return frames
