@@ -1,11 +1,12 @@
 <div align="center">
 <br>
-<h3>One Token to Seg Them All: Language Instructed Reasoning Segmentation in Videos</h3>
+<h2>One Token to Seg Them All: Language Instructed Reasoning Segmentation in Videos</h2>
 
 [Zechen Bai](https://www.baizechen.site/) <sup>1</sup>&nbsp;
 [Tong He](https://hetong007.github.io/) <sup>2</sup>&nbsp;
 [Haiyang Mei](https://mhaiyang.github.io/) <sup>1</sup>&nbsp;
 [Pichao Wang](https://wangpichao.github.io/) <sup>2</sup>&nbsp;
+
 [Ziteng Gao](https://sebgao.github.io/) <sup>1</sup>&nbsp;
 [Joya Chen](https://chenjoya.github.io/) <sup>1</sup>&nbsp;
 [Lei Liu](https://openreview.net/profile?id=~liulei2) <sup>2</sup>&nbsp;
@@ -16,24 +17,26 @@ NeurIPS 2024
 
 <sup>1</sup> [Show Lab, National University of Singapore](https://sites.google.com/view/showlab/home?authuser=0) &nbsp; <sup>2</sup> Amazon&nbsp;
  
-[![arXiv](https://img.shields.io/badge/arXiv-<2409.19603>-<COLOR>.svg)](https://arxiv.org/abs/2409.19603)
+[![model](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-VideoLISA--3.8B-blue)](https://huggingface.co/ZechenBai/VideoLISA-3.8B)
+[![arXiv](https://img.shields.io/badge/arXiv%20paper-2411.17465-b31b1b.svg)](https://arxiv.org/abs/2409.19603)
 
 </div>
 
 **News**
+* **[2024-12-08]** We updated the inference example and evaluation instructions on all datasets.
 * **[2024-11-27]** We released the [ReasonVOS](BENCHMARK.md) benchmark!
 * **[2024-11-26]** We released pre-trained VideoLISA-3.8B at [HuggingFace](https://huggingface.co/ZechenBai/VideoLISA-3.8B)!.
 * **[2024-11-20]** We released the training and inference code.
 * **[2024-09-29]** We released our paper on [arXiv](https://arxiv.org/abs/2409.19603).
 
-<p align="center"> <img src="assets/framework.jpg" width="666"></p>
+<p align="center"> <img src="assets/framework.jpg" width="777"></p>
 
-<p align="center"> <img src="assets/teaser.jpg" width="666"></p>
+<p align="center"> <img src="assets/teaser.jpg" width="777"></p>
 
 ## TODO
 - [X] Release the inference code.
 - [X] Release the training code.
-- [ ] Instructions on supporting more datasets.
+- [X] Instructions on supporting more datasets.
 
 ## Setup Environment
 ```shell
@@ -57,7 +60,7 @@ CUDA_VISIBLE_DEVICES=0 python chat.py \
 > Please input the video path: examples/RBrZsgy4-SQ.mp4
 ```
 
-<p align="center"> <img src="assets/example.png" width="666"></p>
+<p align="center"> <img src="assets/example.png" width="888"></p>
 
 
 ## Prepare Data for Training
@@ -153,10 +156,30 @@ bash evaluation/mevis_val_u/run_eval_mevis.sh
 
 ### ReasonVOS
 
-Please refer to [BENCHMARK.md](BENCHMARK.md).
+```shell
+# Step 1
+bash evaluation/reason_vos/run_inference_reason_vos.sh
 
-### Other Datasets
-Ongoing.
+# Step 2
+bash evaluation/reason_vos/run_eval.sh
+```
+
+
+### Ref-YouTube-VOS
+```shell
+bash evaluation/refytvos/run_inference_refytvos.sh
+```
+
+Submit your result to the online evaluation [server](https://codalab.lisn.upsaclay.fr/competitions/3282#participate-submit_results).
+
+### Ref-DAVIS-17
+```shell
+# Step 1
+bash evaluation/refdavis/run_inference_refdavis.sh
+
+# Step 2
+bash evaluation/refdavis/run_post_process.sh
+```
 
 
 ### Citation

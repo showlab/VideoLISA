@@ -1,10 +1,10 @@
-SCRIPT="evaluation/mevis_val_u/inference_mevis.py"
+SCRIPT="evaluation/refdavis/inference_davis.py"
 VERSION="ZechenBai/VideoLISA-3.8B"
 VID_TOWER="openai/clip-vit-large-patch14-336"
 NUM_FRMS_SPARSE=32
 NUM_FRMS_DENSE=4
 SUBSET_NUM=8
-VIS_SAVE_PATH="results/VideoLISA-MeViS-Valid-U/"   # remember to add /
+VIS_SAVE_PATH="results/VideoLISA-RefDAVIS"
 
 # Step-1: run inference
 CUDA_VISIBLE_DEVICES=0 python $SCRIPT \
