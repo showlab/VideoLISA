@@ -19,11 +19,11 @@ NUM_WOEKERS = 64
 
 def eval_queue(q, rank, out_dict, mask_path, pred_path):
     while not q.empty():
-        vid_key, exp_id = q.get()
-        exp_name = "{}_{}".format(vid_key, exp_id)
+        src_dataset, vid_name, exp_id = q.get()
+        pred_path_vid_exp = os.path.join(pred_path, vid_name, exp_id)
 
+        vid_key = "{}_{}_{}".format(src_dataset, vid_name, exp_id)
         mask_path_vid = os.path.join(mask_path, vid_key)
-        pred_path_vid_exp = os.path.join(pred_path, vid_key, exp_id)
 
         if not os.path.exists(mask_path_vid):
             print(f'{mask_path_vid} not found, not take into metric computation')
@@ -47,13 +47,13 @@ def eval_queue(q, rank, out_dict, mask_path, pred_path):
 
         j = db_eval_iou(gt_masks, pred_masks).mean()
         f = db_eval_boundary(gt_masks, pred_masks).mean()
-        out_dict[exp_name] = [j, f]
+        out_dict[vid_key] = [j, f]
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("--meta_exp_path", type=str, default="/home/ubuntu/ReasonVOS.benchmark/benchmark/meta_expressions.json")
-    parser.add_argument("--mask_path", type=str, default="/home/ubuntu/ReasonVOS.benchmark/benchmark/Annotations")
+    parser.add_argument("--meta_exp_path", type=str, default="ReasonVOS/meta_expressions.json")
+    parser.add_argument("--mask_path", type=str, default="ReasonVOS/Annotations")
     parser.add_argument("--pred_path", type=str, default="")
     parser.add_argument("--save_name", type=str, default="")
     args = parser.parse_args()
@@ -62,17 +62,13 @@ if __name__ == '__main__':
     meta_exp = json.load(open(args.meta_exp_path, 'r'))["videos"]
     output_dict = mp.Manager().dict()
 
-    with open("/home/ubuntu/ReasonVOS.benchmark/baned_vid_list.txt", "r") as f:
-        banned_vid_key_list = f.readlines()
-        banned_vid_key_list = [str(x).strip() for x in banned_vid_key_list]
-
-    for vid_key in meta_exp.keys():
-        vid = meta_exp[vid_key]
-        assert "final" in vid.keys()
+    for vid_name in meta_exp.keys():
+        vid = meta_exp[vid_name]
+        src_dataset = vid['source']
         is_sent = vid['is_sent']
-        exps = vid['final']
-        for exp_id, exp_text in enumerate(exps):
-            queue.put([vid_key, str(exp_id)])
+        for exp in vid['expressions']:
+            exp_id = vid['expressions'][exp]['obj_id']
+            queue.put([src_dataset, vid_name, str(exp_id)])
 
     print("Q-Size:", queue.qsize())
 

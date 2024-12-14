@@ -207,8 +207,7 @@ def main(args):
         os.makedirs(save_dir_vid_exp, exist_ok=True)
 
         # prepare video frames
-        vid_name = '_'.join(vid_key.split('_')[1:-1])
-        image_folder = os.path.join(video_folder, vid_name)
+        image_folder = os.path.join(video_folder, vid_key)
         if not os.path.exists(image_folder):
             print("File not found in {}".format(image_folder))
             raise FileNotFoundError
