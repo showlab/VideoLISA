@@ -152,6 +152,7 @@ def main(args):
     model = VideoLISAForCausalLM.from_pretrained(
         args.version, torch_dtype=torch_dtype, low_cpu_mem_usage=True,
         cache_dir="/home/ubuntu/.cache/huggingface/hub",
+        attn_implementation="flash_attention_2",
         **model_args
     )
     model.config.eos_token_id = tokenizer.eos_token_id

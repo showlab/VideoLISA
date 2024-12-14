@@ -153,7 +153,12 @@ def main(args):
 
     # ---------------------------- prepare model ------------------------------------
     model = VideoLISAForCausalLM.from_pretrained(
-        args.version, low_cpu_mem_usage=True, vision_tower=args.vision_tower, seg_token_idx=args.seg_token_idx, **kwargs
+        args.version,
+        low_cpu_mem_usage=True,
+        vision_tower=args.vision_tower,
+        seg_token_idx=args.seg_token_idx,
+        attn_implementation="flash_attention_2",
+        **kwargs
     )
 
     model.config.eos_token_id = tokenizer.eos_token_id

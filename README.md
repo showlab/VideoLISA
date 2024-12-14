@@ -40,10 +40,21 @@ NeurIPS 2024
 
 ## Setup Environment
 ```shell
+git clone https://github.com/showlab/VideoLISA.git
+
 conda create -n videolisa python=3.10 -y
 conda activate videolisa
 pip install --upgrade pip  # enable PEP 660 support
+
+
+# for cuda 11.8
+pip install torch==2.1.0 torchvision==0.16.0 --index-url https://download.pytorch.org/whl/cu118
+# for cuda 12.1
+pip install torch==2.1.0 torchvision==0.16.0 --index-url https://download.pytorch.org/whl/cu121
+
 pip install -e .
+
+pip install git+https://github.com/huggingface/transformers@a98c41798cf6ed99e1ff17e3792d6e06a2ff2ff3
 pip install flash-attn --no-build-isolation
 ```
 
@@ -182,7 +193,7 @@ bash evaluation/refdavis/run_post_process.sh
 ```
 
 
-### Citation
+## Citation
 To cite the paper and model, please use the below:
 ```
 @article{bai2024one,

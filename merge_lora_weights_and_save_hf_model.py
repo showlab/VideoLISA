@@ -77,7 +77,11 @@ def main(args):
     elif args.precision == "fp16":
         torch_dtype = torch.half
     model = VideoLISAForCausalLM.from_pretrained(
-        args.version, torch_dtype=torch_dtype, low_cpu_mem_usage=True, **model_args
+        args.version,
+        torch_dtype=torch_dtype,
+        low_cpu_mem_usage=True,
+        attn_implementation="flash_attention_2",
+        **model_args
     )
     model.config.eos_token_id = tokenizer.eos_token_id
     model.config.bos_token_id = tokenizer.bos_token_id
