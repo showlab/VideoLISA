@@ -14,7 +14,7 @@ classifiers = [
 ]
 dependencies = [
     "tokenizers==0.19.1", "sentencepiece==0.1.99", "shortuuid",
-    "accelerate==0.21.0", "peft", "bitsandbytes",
+    "accelerate==0.21.0", "peft==0.4.0", "bitsandbytes",
     "pydantic", "markdown2[all]", "numpy", "scikit-learn==1.2.2",
     "requests", "httpx==0.24.0", "uvicorn", "fastapi",
     "einops==0.6.1", "einops-exts==0.0.4", "timm==0.6.13", "tensorboard==2.17.0",
