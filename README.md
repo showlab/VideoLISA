@@ -23,6 +23,7 @@ NeurIPS 2024
 </div>
 
 **News**
+* **[2024-12-26]** We updated an instruction on post-optimization.
 * **[2024-12-26]** We now support evaluation on image benchmarks, including refCOCO, etc.
 * **[2024-12-08]** We updated the inference example and evaluation instructions on all datasets.
 * **[2024-11-27]** We released the [ReasonVOS](BENCHMARK.md) benchmark!
@@ -213,6 +214,21 @@ deepspeed --master_port=24999 evaluation/eval_img/val.py \
 # ReasonSeg subsets: ReasonSeg|val, ReasonSeg|test|short, ReasonSeg|val|long, ReasonSeg|val|all
 # refCOCO variants: refcoco|unc|testA, refcoco|unc|testB, refcoco+|unc|testA, refcoco+|unc|testB, refcocog|umd|test, refcoco|unc|val, refcoco+|unc|val, refcocog|umd|val
 ```
+
+## Post-optimization
+The post-optimization utilized in our paper is implemented based on [XMem2](https://github.com/mbzuai-metaverse/XMem2/tree/main).
+
+XMem2 is well organized as a workflow, which cannot be trivially integrated into other codebase, e.g., VideoLISA.
+Through our exploration, we find that the best practice is to import the raw inference results to XMem2 and work on the XMem2 codebase.
+To facilitate this process, we provide an example of the workflow in [xmem2_example](.\xmem2_example).
+
+It generally includes 4 steps:
+1. Select effective masks produced by [TRK] token. XMem2 supports multiple reference masks, compared to only single reference in XMem.
+2. Build `Workspace` and import your data into it. `Workspace` is a concept in XMem2's framework to organize data.
+3. Run optimization of XMem2.
+4. Recover color platte, as the XMem2's codebase is conducted on multi-channel color platte, while VideoLISA adapt binary masks.
+
+After that, you may continue to following evaluation.
 
 
 ## Citation
