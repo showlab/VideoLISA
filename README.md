@@ -23,6 +23,7 @@ NeurIPS 2024
 </div>
 
 **News**
+* **[2024-12-26]** We now support evaluation on image benchmarks, including refCOCO, etc.
 * **[2024-12-08]** We updated the inference example and evaluation instructions on all datasets.
 * **[2024-11-27]** We released the [ReasonVOS](BENCHMARK.md) benchmark!
 * **[2024-11-26]** We released pre-trained VideoLISA-3.8B at [HuggingFace](https://huggingface.co/ZechenBai/VideoLISA-3.8B)!.
@@ -190,6 +191,27 @@ bash evaluation/refdavis/run_inference_refdavis.sh
 
 # Step 2
 bash evaluation/refdavis/run_post_process.sh
+```
+
+### Image Benchmarks
+To support evaluation on the image benchmarks, including ReasonSeg and refCoco series, we proved a holistic script as below.
+First, prepare image data following [instruction in LISA](https://github.com/dvlab-research/LISA/tree/main?tab=readme-ov-file#training-data-preparation).
+After that,
+```shell
+deepspeed --master_port=24999 evaluation/eval_img/val.py \
+  --version="ZechenBai/VideoLISA-3.8B" \
+  --dataset_dir='/data_sdf/LLM_DATA/LISA/datasets' \
+  --vision_pretrained="/home/ubuntu/ckpt/SAM/sam_vit_h_4b8939.pth" \
+  --vision_tower="openai/clip-vit-large-patch14-336" \
+  --num_frames_sparse=32 \
+  --num_frames_dense=4 \
+  --model_max_length=2048 \
+  --eval_only \
+  --val_dataset="ReasonSeg|val"
+
+# --val_dataset can be changed to:
+# ReasonSeg subsets: ReasonSeg|val, ReasonSeg|test|short, ReasonSeg|val|long, ReasonSeg|val|all
+# refCOCO variants: refcoco|unc|testA, refcoco|unc|testB, refcoco+|unc|testA, refcoco+|unc|testB, refcocog|umd|test, refcoco|unc|val, refcoco+|unc|val, refcocog|umd|val
 ```
 
 

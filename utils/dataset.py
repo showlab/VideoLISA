@@ -612,6 +612,8 @@ class ReasonSegTestDataset(torch.utils.data.Dataset):
     ):
         # self.base_image_dir = base_image_dir
         self.base_image_dir = "/home/ubuntu/data/ReasonSeg"
+        if not os.path.exists(self.base_image_dir):
+            raise FileNotFoundError
         splits = val_dataset.split("|")
         assert len(splits) == 3
 
@@ -743,6 +745,176 @@ class ReasonSegTestDataset(torch.utils.data.Dataset):
             masks,
             labels,
             list(range(self.num_frames_dense)),
+            resize,
+            None,
+            None,
+            inference,
+        )
+
+
+class RefImgValDataset(torch.utils.data.Dataset):
+    pixel_mean = torch.Tensor([123.675, 116.28, 103.53]).view(-1, 1, 1)
+    pixel_std = torch.Tensor([58.395, 57.12, 57.375]).view(-1, 1, 1)
+    img_size = 1024
+    ignore_label = 255
+
+    def __init__(
+        self,
+        base_image_dir,
+        tokenizer,
+        vision_tower,
+        val_dataset,
+        image_size=1024,
+        num_frames_temporal=50,
+        num_frames_spatial=4,
+    ):
+        self.base_image_dir = base_image_dir
+        splits = val_dataset.split("|")
+        assert len(splits) == 3
+
+        ds, splitBy, split = splits
+        refer_api = REFER(os.path.join(self.base_image_dir, 'refer_seg'), ds, splitBy)
+        ref_ids_val = refer_api.getRefIds(split=split)
+        images_ids_val = refer_api.getImgIds(ref_ids=ref_ids_val)
+        refs_val = refer_api.loadRefs(ref_ids=ref_ids_val)
+        refer_seg_ds = {}
+        refer_seg_ds["images"] = []
+        loaded_images = refer_api.loadImgs(image_ids=images_ids_val)
+        for item in loaded_images:
+            item = item.copy()
+            if ds == "refclef":
+                item["file_name"] = os.path.join(
+                    base_image_dir, "images/saiapr_tc-12", item["file_name"]
+                )
+            elif ds in ["refcoco", "refcoco+", "refcocog", "grefcoco"]:
+                item["file_name"] = os.path.join(
+                    base_image_dir,
+                    # "images/mscoco/images/train2014",
+                    "refer_seg/images/mscoco/images/train2014",
+                    item["file_name"],
+                )
+            refer_seg_ds["images"].append(item)
+        refer_seg_ds["annotations"] = refer_api.Anns  # anns_val
+
+        img2refs = {}
+        for ref in refs_val:
+            image_id = ref["image_id"]
+            img2refs[image_id] = img2refs.get(image_id, []) + [
+                ref,
+            ]
+        refer_seg_ds["img2refs"] = img2refs
+        self.refer_seg_ds = refer_seg_ds
+        self.data_type = "refer_seg"
+
+        data_samples = []
+        for idx in range(len(refer_seg_ds["images"])):
+            image_info = refer_seg_ds["images"][idx]
+            image_path = image_info["file_name"]
+            image_id = image_info["id"]
+            refs = img2refs[image_id]
+            for ref in refs:
+                for sent in ref["sentences"]:
+                    one_sample = [image_path, image_id, image_info, sent["sent"].strip().lower(), ref["ann_id"]]
+                    data_samples.append(one_sample)
+        self.data_samples = data_samples
+
+        self.ds = ds
+        self.image_size = image_size
+        self.tokenizer = tokenizer
+        self.transform = ResizeLongestSide(image_size)
+        self.clip_image_processor = CLIPImageProcessor.from_pretrained(vision_tower)
+
+        self.num_frames_temporal = num_frames_temporal
+        self.num_frames_spatial = num_frames_spatial
+
+    def __len__(self):
+        return len(self.data_samples)
+
+    def preprocess(self, x: torch.Tensor) -> torch.Tensor:
+        """Normalize pixel values and pad to a square input."""
+        # Normalize colors
+        x = (x - self.pixel_mean) / self.pixel_std
+
+        # Pad
+        h, w = x.shape[-2:]
+        padh = self.img_size - h
+        padw = self.img_size - w
+        x = F.pad(x, (0, padw, 0, padh))
+        return x
+
+    def __getitem__(self, idx):
+        image_path, image_id, image_info, sampled_sent, sampled_ann_id = self.data_samples[idx]
+        annotations = self.refer_seg_ds["annotations"]
+        image = cv2.imread(image_path)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        conversations = []
+        conv = conversation_lib.default_conversation.copy()
+        conv.messages = []
+        text = sampled_sent.strip()
+        conv.append_message(
+            conv.roles[0],
+            DEFAULT_IMAGE_TOKEN
+            + "\n What is {} in this video? Please output segmentation mask.".format(
+                text
+            ),
+        )
+        conv.append_message(conv.roles[1], "[SEG].")
+        conversations.append(conv.get_prompt())
+
+        # preprocess image for clip
+        image_clip = self.clip_image_processor.preprocess(image, return_tensors="pt")["pixel_values"][0]
+
+        # preprocess image for sam
+        image = self.transform.apply_image(image)
+        resize = image.shape[:2]
+        image = self.preprocess(torch.from_numpy(image).permute(2, 0, 1).contiguous())
+
+        masks = []
+        ann = annotations[sampled_ann_id]
+        if len(ann["segmentation"]) == 0 and sampled_sent != "":
+            m = np.zeros((image_info["height"], image_info["width"], 1))
+        else:
+            if type(ann["segmentation"][0]) == list:  # polygon
+                rle = mask.frPyObjects(
+                    ann["segmentation"],
+                    image_info["height"],
+                    image_info["width"],
+                )
+            else:
+                rle = ann["segmentation"]
+                for i in range(len(rle)):
+                    if not isinstance(rle[i]["counts"], bytes):
+                        rle[i]["counts"] = rle[i]["counts"].encode()
+            m = mask.decode(rle)
+        m = np.sum(
+            m, axis=2
+        )  # sometimes there are multiple binary map (corresponding to multiple segs)
+        m = m.astype(np.uint8)  # convert to np.uint8
+        masks.append(m)
+
+        masks = np.stack(masks, axis=0)
+        masks = torch.from_numpy(masks)
+        labels = torch.ones(masks.shape[1], masks.shape[2]) * self.ignore_label
+        inference = True
+
+        # Repeat image into video
+        image_clip = torch.stack([image_clip] * self.num_frames_temporal, dim=0)
+        image = torch.stack([image] * self.num_frames_spatial, dim=0)
+        masks = torch.cat([masks] * self.num_frames_spatial, dim=0)
+
+        assert image_clip.shape[0] == self.num_frames_temporal
+        assert image.shape[0] == self.num_frames_spatial
+        assert masks.shape[0] == self.num_frames_spatial or masks.shape[0] == 0, masks.shape
+
+        return (
+            image_path,
+            image,
+            image_clip,
+            conversations,
+            masks,
+            labels,
+            list(range(self.num_frames_spatial)),
             resize,
             None,
             None,
