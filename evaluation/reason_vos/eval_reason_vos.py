@@ -19,11 +19,11 @@ NUM_WOEKERS = 64
 
 def eval_queue(q, rank, out_dict, mask_path, pred_path):
     while not q.empty():
-        src_dataset, vid_name, exp_id = q.get()
-        pred_path_vid_exp = os.path.join(pred_path, vid_name, exp_id)
+        vid_key, exp_id = q.get()
+        exp_name = "{}_{}".format(vid_key, exp_id)
 
-        vid_key = "{}_{}_{}".format(src_dataset, vid_name, exp_id)
         mask_path_vid = os.path.join(mask_path, vid_key)
+        pred_path_vid_exp = os.path.join(pred_path, vid_key, exp_id)
 
         if not os.path.exists(mask_path_vid):
             print(f'{mask_path_vid} not found, not take into metric computation')
@@ -47,7 +47,7 @@ def eval_queue(q, rank, out_dict, mask_path, pred_path):
 
         j = db_eval_iou(gt_masks, pred_masks).mean()
         f = db_eval_boundary(gt_masks, pred_masks).mean()
-        out_dict[vid_key] = [j, f]
+        out_dict[exp_name] = [j, f]
 
 
 if __name__ == '__main__':
@@ -65,10 +65,13 @@ if __name__ == '__main__':
     for vid_name in meta_exp.keys():
         vid = meta_exp[vid_name]
         src_dataset = vid['source']
-        is_sent = vid['is_sent']
-        for exp in vid['expressions']:
-            exp_id = vid['expressions'][exp]['obj_id']
-            queue.put([src_dataset, vid_name, str(exp_id)])
+        for sample in vid['expressions']:
+            obj_id = sample['obj_id']
+            exp_id = sample['exp_id']
+            exp_text = sample['exp_text']
+            is_sent = sample['is_sent']
+            vid_key = f"{src_dataset}_{vid_name}_{obj_id}"
+            queue.put([vid_key, str(exp_id)])
 
     print("Q-Size:", queue.qsize())
 

@@ -23,7 +23,8 @@ NeurIPS 2024
 </div>
 
 **News**
-* **[2024-12-26]** We updated an instruction on post-optimization.
+* **[2024-12-27]** We updated the ReasonVOS benchmark after fixing some issue.
+* **[2024-12-26]** We updated an example on post-optimization.
 * **[2024-12-26]** We now support evaluation on image benchmarks, including refCOCO, etc.
 * **[2024-12-08]** We updated the inference example and evaluation instructions on all datasets.
 * **[2024-11-27]** We released the [ReasonVOS](BENCHMARK.md) benchmark!

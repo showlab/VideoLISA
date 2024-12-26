@@ -92,8 +92,8 @@ def get_sparse_indices(total_frame_num, num_frames_sparse):
         return sorted(frame_idxs)
 
 
-def get_dense_indices(num_frames_temporal, num_frames_dense):
-    intervals = np.linspace(start=0, stop=num_frames_temporal - 1, num=num_frames_dense + 1).astype(int)
+def get_dense_indices(num_frames_sparse, num_frames_dense):
+    intervals = np.linspace(start=0, stop=num_frames_sparse - 1, num=num_frames_dense + 1).astype(int)
     ranges = []
     for idx, interv in enumerate(intervals[:-1]):
         ranges.append((interv, intervals[idx + 1] - 1))

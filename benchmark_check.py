@@ -23,7 +23,6 @@ for video_name in anno_data['videos']:
     """
     "source": Dataset source,
     "frames": A list of frame ids,
-    "is_sent": A question sentence or a description,
     "expressions": Language expressions and corresponding object ids.
     """
 
@@ -54,13 +53,17 @@ for video_name in anno_data['videos']:
 print("All videos exist.")
 
 mask_list = []
-for video_name in anno_data['videos']:
-    item = anno_data['videos'][video_name]
-    data_src = item["source"].lower()
-    for exp in item['expressions']:
-        exp_id = item['expressions'][exp]['obj_id']
-        mask_name = '{}_{}_{}'.format(data_src, video_name, exp_id)
-        mask_list.append(mask_name)
+for vid_name in anno_data['videos'].keys():
+    vid = anno_data['videos'][vid_name]
+    src_dataset = vid['source']
+    for sample in vid['expressions']:
+        obj_id = sample['obj_id']
+        exp_id = sample['exp_id']
+        exp_text = sample['exp_text']
+        is_sent = sample['is_sent']
+        vid_key = f"{src_dataset}_{vid_name}_{obj_id}"
+        mask_list.append(vid_key)
+print("Num of unique masks:", len(set(mask_list)))
 
 for mask_name in mask_list:
     assert os.path.exists(os.path.join(mask_path, mask_name))

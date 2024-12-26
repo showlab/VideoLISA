@@ -6,6 +6,9 @@ from tqdm import tqdm
 from glob import glob
 from collections import defaultdict
 
+import sys
+sys.path.append(".")
+
 import cv2
 import numpy as np
 import torch
@@ -92,8 +95,8 @@ def get_sparse_indices(total_frame_num, num_frames_sparse):
         return sorted(frame_idxs)
 
 
-def get_dense_indices(num_frames_temporal, num_frames_dense):
-    intervals = np.linspace(start=0, stop=num_frames_temporal - 1, num=num_frames_dense + 1).astype(int)
+def get_dense_indices(num_frames_sparse, num_frames_dense):
+    intervals = np.linspace(start=0, stop=num_frames_sparse - 1, num=num_frames_dense + 1).astype(int)
     ranges = []
     for idx, interv in enumerate(intervals[:-1]):
         ranges.append((interv, intervals[idx + 1] - 1))
@@ -189,12 +192,15 @@ def main(args):
 
     # ------------------ split into subsets for each GPU -------------------------
     job_list = []
-    for vid_key in meta_exp.keys():
-        vid = meta_exp[vid_key]
-        is_sent = vid['is_sent']
-        for exp in vid['expressions']:
-            exp_id = vid['expressions'][exp]['obj_id']
-            exp_text = vid['expressions'][exp]['exp_text']
+    for vid_name in meta_exp.keys():
+        vid = meta_exp[vid_name]
+        src_dataset = vid['source']
+        for sample in vid['expressions']:
+            obj_id = sample['obj_id']
+            exp_id = sample['exp_id']
+            exp_text = sample['exp_text']
+            is_sent = sample['is_sent']
+            vid_key = f"{src_dataset}_{vid_name}_{obj_id}"
             job_list.append((vid_key, str(exp_id), exp_text, is_sent))
 
     job_list_subset = [job_list[i] for i in range(len(job_list)) if i % args.subset_num == args.subset_idx]
@@ -212,7 +218,8 @@ def main(args):
         os.makedirs(save_dir_vid_exp, exist_ok=True)
 
         # prepare video frames
-        image_folder = os.path.join(video_folder, vid_key)
+        vid_name = '_'.join(vid_key.split('_')[1:-1])
+        image_folder = os.path.join(video_folder, vid_name)
         if not os.path.exists(image_folder):
             print("File not found in {}".format(image_folder))
             raise FileNotFoundError

@@ -16,7 +16,7 @@ Shout out to these amazing works!!
 <summary>Download</summary>
 
 ```
-Google Drive: https://drive.google.com/file/d/1qruU9QlUhPcHnN-UHG7iri2nhw_xo7gP/view?usp=sharing
+Google Drive: https://drive.google.com/file/d/1QMggGR91AE-iUUub5YwzMYiFt0TeV5_8/view?usp=sharing
 ```
 
 Please refer to [benchmark_check.py](benchmark_check.py) to explore the structure of the dataset.
